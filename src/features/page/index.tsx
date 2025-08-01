@@ -2,7 +2,7 @@
 
 import { FilterPanel } from '@/features/page/components/filter-panel';
 import { MovieList } from '@/features/page/components/movie-list';
-import { useFilterState } from '@/features/page/hooks/use-filter-state';
+import { useFilters } from '@/features/page/hooks/use-filters'
 import { MoviesResponse } from '@/types/movie';
 import { EmptyState } from '@/components/empty-state';
 import { ErrorMessage } from '@/components/error-message';
@@ -10,7 +10,7 @@ import { LoadingSpinner } from '@/components/loading-spinner';
 
 
 interface SearchMoviesProps {
-  initialMovies: MoviesResponse;
+  initialMovies: MoviesResponse
 }
 
 export const SearchMovies = ({ initialMovies }: SearchMoviesProps) => {
@@ -20,17 +20,13 @@ export const SearchMovies = ({ initialMovies }: SearchMoviesProps) => {
     appliedFilters,
     hasAppliedFilters,
     handleSearchWithScroll,
-    handleGenreToggle,
     resetFilters,
     genres,
-    genresError,
-    genresIsLoading,
     filterData,
-    filterDataError,
     filterDataIsLoading,
-    hasError,
-    hasResults,
-  } = useFilterState();
+    filterDataError,
+    hasFilterData,
+  } = useFilters()
 
   return (
     <div className="space-y-8">
@@ -40,7 +36,6 @@ export const SearchMovies = ({ initialMovies }: SearchMoviesProps) => {
         filters={filters}
         setFilters={setFilters}
         isLoading={filterDataIsLoading}
-        onGenreToggle={handleGenreToggle}
         onReset={resetFilters}
         onSearch={handleSearchWithScroll}
       />
@@ -54,7 +49,7 @@ export const SearchMovies = ({ initialMovies }: SearchMoviesProps) => {
             </div>
           )}
 
-          {hasError && (
+          {!filterDataIsLoading && filterDataError && (
             <ErrorMessage
               title="搜尋失敗"
               message="無法載入搜尋結果，請檢查網路連線並重試。"
@@ -62,7 +57,7 @@ export const SearchMovies = ({ initialMovies }: SearchMoviesProps) => {
             />
           )}
 
-          {!hasResults && (
+          {!filterDataIsLoading && !hasFilterData && (
             <EmptyState
               title="找不到相關電影"
               message="沒有找到符合篩選條件的電影，請調整篩選條件重新搜尋。"
@@ -70,19 +65,19 @@ export const SearchMovies = ({ initialMovies }: SearchMoviesProps) => {
           )}
 
           <MovieList
+            title="搜尋結果"
             initialMovies={initialMovies}
             filteredMovies={filterData}
             isFilterMode={true}
-            searchFilters={appliedFilters}
-            title="搜尋結果"
+            appliedFilters={appliedFilters}
           />
         </div>
       )}
 
       {/* 尚未搜尋前，顯示熱門電影 */}
       {!hasAppliedFilters && (
-        <MovieList initialMovies={initialMovies} isFilterMode={false} title="熱門電影" />
+        <MovieList title="熱門電影" initialMovies={initialMovies} isFilterMode={false} />
       )}
     </div>
-  );
-};
+  )
+}

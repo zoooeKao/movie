@@ -1,30 +1,23 @@
 "use client";
 
 import { usePagination } from '@/features/page/hooks/use-pagination';
+import { cn } from '@/utils/utils';
 import { Check, ChevronLeft, ChevronRight, ChevronsUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 interface PaginationProps {
-  currentPage: number;
-  canGoBack: boolean;
-  canGoForward: boolean;
-  totalPages?: number;
-  isLoading?: boolean;
-  onPreviousPage: () => void;
-  onNextPage: () => void;
-  onPageSelect?: (page: number) => void;
-  className?: string;
-  showTotalPages?: boolean;
+  currentPage: number
+  canGoBack: boolean
+  canGoForward: boolean
+  totalPages?: number
+  isLoading?: boolean
+  onPreviousPage: () => void
+  onNextPage: () => void
+  onPageSelect?: (page: number) => void
+  className?: string
+  showTotalPages?: boolean
 }
 
 export const Pagination = ({

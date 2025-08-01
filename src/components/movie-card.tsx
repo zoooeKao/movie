@@ -1,13 +1,13 @@
 'use client';
 
 import { useWatchList } from '@/hooks/use-watch-list';
+import { formatRating } from '@/utils/format-rating';
+import { cn } from '@/utils/utils';
 import { Heart, Star } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
-import { Movie } from '@/types/movie';
-import { tmdbApi } from '@/lib/api';
-import { formatRating } from '@/lib/format-rating';
-import { cn } from '@/lib/utils';
+import Link from 'next/link'
+import { Movie } from '@/types/movie'
+import { tmdbApi } from '@/lib/api'
 
 
 interface MovieCardProps {
@@ -26,10 +26,8 @@ export const MovieCard = ({ movie }: MovieCardProps) => {
     if (isInList) {
       removeFromWatchList(movie.id);
     } else {
-      addToWatchList(movie);
+      addToWatchList(movie)
     }
-
-    // onWatchListChange?.();
   };
 
   const posterUrl = tmdbApi.getPosterImage(movie.poster_path, 'w500');

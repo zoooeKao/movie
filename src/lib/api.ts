@@ -1,18 +1,26 @@
-import axios, { AxiosError } from 'axios';
-import { toast } from 'sonner';
-import { Credits, Genre, MovieDetails, MoviesResponse, ReviewsResponse, VideosResponse } from '@/types/movie';
+import { DiscoverMovieParams } from '@/features/page/types'
+import axios, { AxiosError } from 'axios'
+import { toast } from 'sonner'
+import {
+  Credits,
+  Genre,
+  MovieDetails,
+  MoviesResponse,
+  ReviewsResponse,
+  VideosResponse,
+} from '@/types/movie'
 
-const TMDB_BASE_URL = process.env.NEXT_PUBLIC_TMDB_BASE_URL;
-const JWT_TOKEN = process.env.NEXT_PUBLIC_TMDB_API_TOKEN;
+const TMDB_BASE_URL = process.env.NEXT_PUBLIC_TMDB_BASE_URL
+const JWT_TOKEN = process.env.NEXT_PUBLIC_TMDB_API_TOKEN
 // const JWT_TOKEN =
 //   'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3Mjc0YzlmNjJkMTc3OWMxMTMwNWU0N2FkYmYwNjgyOSIsIm5iZiI6MTc1MjkzNjIyMy40NzQsInN1YiI6IjY4N2JhZjFmOThjNTk3ZjExYThhNDJjMiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.E2mO9fpXsEzncI4gnU0endKh7dAl9HqAzd-JE9aBBno';
-const LANGUAGE = 'zh-TW';
+const LANGUAGE = 'zh-TW'
 
 // TMDB API 錯誤類型定義
 interface TMDBErrorResponse {
-  success: boolean;
-  status_code: number;
-  status_message: string;
+  success: boolean
+  status_code: number
+  status_message: string
 }
 
 // TMDB 錯誤代碼對應表
@@ -75,7 +83,7 @@ const TMDB_ERROR_MESSAGES: Record<number, string> = {
   // 找不到資源
   34: '找不到您請求的資源',
   37: '找不到請求的工作階段',
-};
+}
 
 // 錯誤類型分類
 const ERROR_TYPES = {
@@ -85,7 +93,7 @@ const ERROR_TYPES = {
   SERVER_ERROR: [2, 9, 11, 15, 24, 43, 44, 46], // 5xx：伺服器錯誤（Server Error）
   RATE_LIMIT_ERROR: [8, 25, 45], // 429：請求過於頻繁（Rate Limit Exceeded）
   NOT_FOUND: [34, 37], // 404：找不到資源（Not Found）
-};
+}
 
 const showToast = (error: AxiosError<TMDBErrorResponse>) => {
   toast(error.message, {
@@ -95,8 +103,8 @@ const showToast = (error: AxiosError<TMDBErrorResponse>) => {
       color: 'white',
     },
     duration: 5000,
-  });
-};
+  })
+}
 
 // 建立 axios 實例
 export const api = axios.create({
@@ -104,139 +112,68 @@ export const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-});
+})
 
 // 請求攔截器
 api.interceptors.request.use(
   config => {
     if (JWT_TOKEN) {
-      config.headers['Authorization'] = `Bearer ${JWT_TOKEN}`;
+      config.headers['Authorization'] = `Bearer ${JWT_TOKEN}`
     }
-    return config;
+    return config
   },
   error => {
-    return Promise.reject(error);
+    return Promise.reject(error)
   },
-);
+)
 
 // 回應攔截器
 api.interceptors.response.use(
   response => {
-    return response;
+    return response
   },
   (error: AxiosError<TMDBErrorResponse>) => {
-    const status = error.response?.status;
-    const responseData = error.response?.data;
+    const status = error.response?.status
+    const responseData = error.response?.data
 
-    const isClient = typeof window !== 'undefined';
+    const isClient = typeof window !== 'undefined'
 
     // 處理 TMDB API 特定錯誤
     if (responseData && responseData.status_code) {
-      const tmdbErrorCode = responseData.status_code;
+      const tmdbErrorCode = responseData.status_code
       const tmdbErrorMessage =
-        TMDB_ERROR_MESSAGES[tmdbErrorCode] || responseData.status_message || '未知錯誤';
+        TMDB_ERROR_MESSAGES[tmdbErrorCode] || responseData.status_message || '未知錯誤'
 
       // 根據錯誤類型進行不同的處理
       if (ERROR_TYPES.AUTH_ERROR.includes(tmdbErrorCode)) {
         isClient
           ? showToast(error)
-          : console.error({ type: '認證錯誤', tmdbErrorCode, tmdbErrorMessage });
+          : console.error({ type: '認證錯誤', tmdbErrorCode, tmdbErrorMessage })
       } else if (ERROR_TYPES.REQUEST_ERROR.includes(tmdbErrorCode)) {
         isClient
           ? showToast(error)
-          : console.error({ type: '請求錯誤', tmdbErrorCode, tmdbErrorMessage });
+          : console.error({ type: '請求錯誤', tmdbErrorCode, tmdbErrorMessage })
       } else if (ERROR_TYPES.SERVER_ERROR.includes(tmdbErrorCode)) {
-        console.error({ type: '伺服器錯誤', tmdbErrorCode, tmdbErrorMessage });
+        console.error({ type: '伺服器錯誤', tmdbErrorCode, tmdbErrorMessage })
       } else if (ERROR_TYPES.RATE_LIMIT_ERROR.includes(tmdbErrorCode)) {
-        console.error({ type: '限制錯誤', tmdbErrorCode, tmdbErrorMessage });
+        console.error({ type: '限制錯誤', tmdbErrorCode, tmdbErrorMessage })
       } else if (ERROR_TYPES.NOT_FOUND.includes(tmdbErrorCode)) {
         isClient
           ? showToast(error)
-          : console.error({ type: '找不到資源', tmdbErrorCode, tmdbErrorMessage });
+          : console.error({ type: '找不到資源', tmdbErrorCode, tmdbErrorMessage })
       }
     } else {
       if (status && status >= 401 && status < 500) {
-        isClient ? showToast(error) : console.error('用戶端錯誤');
+        isClient ? showToast(error) : console.error('用戶端錯誤')
       } else if (status && status >= 500) {
-        console.error('伺服器發生錯誤，請稍後再試');
+        console.error('伺服器發生錯誤，請稍後再試')
       } else {
-        console.error('發生未知錯誤');
+        console.error('發生未知錯誤')
       }
     }
-    return Promise.reject(error);
+    return Promise.reject(error)
   },
-);
-
-// 錯誤處理函式
-// const handleAuthError = (code: number, message: string) => {
-//   // 認證錯誤處理邏輯
-//   switch (code) {
-//     case 7:
-//     case 10:
-//       // API 金鑰問題
-//       console.warn('API 金鑰問題，可能需要重新設定');
-//       break;
-//     case 31:
-//     case 32:
-//       // 帳戶問題
-//       console.warn('帳戶問題，可能需要重新驗證');
-//       break;
-//     default:
-//       console.warn('認證失敗，可能需要重新登入');
-//   }
-// };
-
-// const handleRequestError = (code: number, message: string) => {
-//   // 請求錯誤處理邏輯
-//   switch (code) {
-//     case 22:
-//       console.warn('頁面參數錯誤');
-//       break;
-//     case 23:
-//       console.warn('日期格式錯誤');
-//       break;
-//     case 25:
-//       console.warn('API 請求限制');
-//       break;
-//     default:
-//       console.warn('請求參數錯誤');
-//   }
-// };
-
-// const handleServerError = (code: number, message: string) => {
-//   // 伺服器錯誤處理邏輯
-//   switch (code) {
-//     case 9:
-//     case 46:
-//       console.warn('服務維護中');
-//       break;
-//     case 24:
-//       console.warn('請求逾時');
-//       break;
-//     default:
-//       console.warn('伺服器錯誤');
-//   }
-// };
-
-// const handleRateLimitError = (code: number, message: string) => {
-//   // 限制錯誤處理邏輯
-//   switch (code) {
-//     case 25:
-//       console.warn('API 請求次數超過限制');
-//       break;
-//     case 8:
-//       console.warn('重複提交資料');
-//       break;
-//     default:
-//       console.warn('操作受限');
-//   }
-// };
-
-// const handleNotFoundError = (code: number, message: string) => {
-//   // 找不到資源錯誤處理邏輯
-//   console.warn('請求的資源不存在');
-// };
-
+)
 // API 函式
 export const tmdbApi = {
   // 搜尋電影
@@ -248,35 +185,23 @@ export const tmdbApi = {
         language: LANGUAGE,
         include_adult: false,
       },
-    });
-    return response.data;
+    })
+    return response.data
   },
 
-  // 使用 discover API 搜尋電影（支援篩選）
-  discoverMovies: async (
-    params: {
-      page?: number;
-      release_date_gte?: string;
-      release_date_lte?: string;
-      vote_average_gte?: number;
-      vote_average_lte?: number;
-      with_runtime_gte?: number;
-      with_runtime_lte?: number;
-      with_genres?: string;
-    } = {},
-  ): Promise<MoviesResponse> => {
+  // 篩選電影
+  discoverMovies: async (params: DiscoverMovieParams): Promise<MoviesResponse> => {
     const response = await api.get<MoviesResponse>('/discover/movie', {
       params: {
         page: params.page || 1,
         language: LANGUAGE,
         certification_country: 'TW',
-        show_me: 'everything',
         sort_by: 'popularity.desc',
         watch_region: 'TW',
         ...params,
       },
-    });
-    return response.data;
+    })
+    return response.data
   },
 
   // 取得電影類型清單
@@ -285,9 +210,8 @@ export const tmdbApi = {
       params: {
         language: LANGUAGE,
       },
-    });
-    console.log('getGenres response.data', response.data);
-    return response.data;
+    })
+    return response.data
   },
 
   // 取得熱門電影
@@ -297,8 +221,8 @@ export const tmdbApi = {
         page,
         language: LANGUAGE,
       },
-    });
-    return response.data;
+    })
+    return response.data
   },
 
   // 取得最新電影
@@ -308,8 +232,8 @@ export const tmdbApi = {
         page,
         language: LANGUAGE,
       },
-    });
-    return response.data;
+    })
+    return response.data
   },
 
   // 取得電影詳情
@@ -318,8 +242,8 @@ export const tmdbApi = {
       params: {
         language: LANGUAGE,
       },
-    });
-    return response.data;
+    })
+    return response.data
   },
 
   // 取得演員資訊
@@ -328,8 +252,8 @@ export const tmdbApi = {
       params: {
         language: LANGUAGE,
       },
-    });
-    return response.data;
+    })
+    return response.data
   },
 
   // 取得電影預告片
@@ -338,8 +262,8 @@ export const tmdbApi = {
       params: {
         language: LANGUAGE,
       },
-    });
-    return response.data;
+    })
+    return response.data
   },
 
   // 取得電影評論
@@ -349,42 +273,28 @@ export const tmdbApi = {
         page,
         language: LANGUAGE,
       },
-    });
-    return response.data;
+    })
+    return response.data
   },
 
   // 圖片 URL 輔助函式
   getImageUrl: (path: string | null, size: 'w200' | 'w300' | 'w500'): string | null => {
-    if (!path) return null;
-    return `https://image.tmdb.org/t/p/${size}${path}`;
+    if (!path) return null
+    return `https://image.tmdb.org/t/p/${size}${path}`
   },
 
   getBackdropImage: (path: string | null, size: 'w300' | 'w780' | 'w1280'): string | null => {
-    if (!path) return null;
-    return `https://image.tmdb.org/t/p/${size}${path}`;
+    if (!path) return null
+    return `https://image.tmdb.org/t/p/${size}${path}`
   },
 
   getPosterImage: (path: string | null, size: 'w154' | 'w342' | 'w500' | 'w780'): string | null => {
-    if (!path) return null;
-    return `https://image.tmdb.org/t/p/${size}${path}`;
+    if (!path) return null
+    return `https://image.tmdb.org/t/p/${size}${path}`
   },
 
   getProfileImage: (path: string | null, size: 'w45' | 'w185' | 'h632'): string | null => {
-    if (!path) return null;
-    return `https://image.tmdb.org/t/p/${size}${path}`;
+    if (!path) return null
+    return `https://image.tmdb.org/t/p/${size}${path}`
   },
-};
-
-// 錯誤處理輔助函式
-// export const getErrorMessage = (error: unknown): Promise<SearchMoviesResponse> => {
-//   return new Promise((resolve, reject) => {
-//     reject('error');
-//   });
-//   // if (error instanceof AxiosError) {
-//   //   return error.message || '發生未知錯誤';
-//   // }
-//   // if (error instanceof Error) {
-//   //   return error.message;
-//   // }
-//   // return '發生未知錯誤';
-// };
+}

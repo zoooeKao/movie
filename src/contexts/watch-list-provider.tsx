@@ -1,9 +1,10 @@
 'use client';
 
 import { ReactNode, createContext, useEffect, useState } from 'react';
+import { getWatchList, saveWatchList } from '@/utils/watch-list';
 import { Movie } from '@/types/movie';
-import { WatchListContextType, WatchListItem } from '@/types/watch-list';
-import { getWatchList, saveWatchList } from '@/lib/watch-list';
+import { WatchListContextType, WatchListItem } from '@/types/watch-list'
+
 
 export const WatchListContext = createContext<WatchListContextType | undefined>(undefined);
 

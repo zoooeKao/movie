@@ -136,19 +136,3 @@ export type MoviesResponse = {
   total_results: number;
 };
 
-// 搜尋篩選參數介面
-export interface DiscoverMovieFilters {
-  voteAverage: {
-    range: [number, number];
-    step: number;
-  };
-  releaseDate?: {
-    from?: Date;
-    to?: Date;
-  };
-  runtime: {
-    range: [number, number];
-    step: number;
-  };
-  genres: number[];
-}

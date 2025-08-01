@@ -1,18 +1,19 @@
 'use client';
 
 import { useState } from 'react';
+import { useWatchList } from '@/hooks/use-watch-list';
+import { formatDate } from '@/utils/format-date';
+import { formatRating } from '@/utils/format-rating';
+import { cn } from '@/utils/utils';
+import { CalendarIcon, ChevronDown, Clock, Heart, Play, Star } from 'lucide-react';
 import Image from 'next/image';
 import useSWR from 'swr';
-import { Calendar, ChevronDown, Clock, Heart, Play, Star } from 'lucide-react';
 import { Credits, MovieDetails, ReviewsResponse, VideosResponse } from '@/types/movie';
 import { ErrorMessage } from '@/components/error-message';
-import { LoadingSpinner } from '@/components/loading-spinner';
-import { Button } from '@/components/ui/button';
-import { tmdbApi } from '@/lib/api';
-import { formatDate } from '@/lib/format-date';
-import { formatRating } from '@/lib/format-rating';
-import { cn } from '@/lib/utils';
-import { useWatchList } from '@/hooks/use-watch-list';
+import { LoadingSpinner } from '@/components/loading-spinner'
+import { Button } from '@/components/ui/button'
+import { tmdbApi } from '@/lib/api'
+
 
 const PER_VISIBLE_CAST_COUNT = 16;
 
@@ -22,52 +23,49 @@ interface MovieDetailClientProps {
   videos: VideosResponse;
 }
 
-const getMovieReviews = async (movieId: number): Promise<ReviewsResponse> => {
-  return tmdbApi.getMovieReviews(movieId);
-};
 
 export const MovieDetail = ({ movieDetails, credits, videos }: MovieDetailClientProps) => {
-  const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
-  const [visibleCastCount, setVisibleCastCount] = useState(PER_VISIBLE_CAST_COUNT);
-  const { isInWatchList, addToWatchList, removeFromWatchList } = useWatchList();
+  const [selectedVideo, setSelectedVideo] = useState<string | null>(null)
+  const [visibleCastCount, setVisibleCastCount] = useState(PER_VISIBLE_CAST_COUNT)
+  const { isInWatchList, addToWatchList, removeFromWatchList } = useWatchList()
 
-  const isInList = isInWatchList(movieDetails.id);
+  const isInList = isInWatchList(movieDetails.id)
 
   // 載入評論
   const { data: reviewsData, error: reviewsError } = useSWR<ReviewsResponse>(
     ['movie-reviews', movieDetails.id],
-    () => getMovieReviews(movieDetails.id),
+    () => tmdbApi.getMovieReviews(movieDetails.id),
     { revalidateOnFocus: false },
-  );
+  )
 
   const handleWatchListClick = () => {
     if (isInList) {
-      removeFromWatchList(movieDetails.id);
+      removeFromWatchList(movieDetails.id)
     } else {
-      addToWatchList(movieDetails);
+      addToWatchList(movieDetails)
     }
-  };
+  }
 
-  const backdropUrl = tmdbApi.getBackdropImage(movieDetails.backdrop_path, 'w780');
-  const posterUrl = tmdbApi.getPosterImage(movieDetails.poster_path, 'w500');
+  const backdropUrl = tmdbApi.getBackdropImage(movieDetails.backdrop_path, 'w780')
+  const posterUrl = tmdbApi.getPosterImage(movieDetails.poster_path, 'w500')
 
   // 找到預告片
   const trailer =
     videos.results.find(video => video.type === 'Trailer' && video.site === 'YouTube') ||
-    videos.results[0];
+    videos.results[0]
 
   // 找到導演
   const director = credits.crew
     .filter(person => person.job === 'Director' || person.job === 'Characters')
     .map(({ name, job }) => {
-      return { name, job };
-    });
+      return { name, job }
+    })
 
   // 主要演員
-  const mainCast = credits.cast;
+  const mainCast = credits.cast
 
   // 評論
-  const reviews = reviewsData?.results || [];
+  const reviews = reviewsData?.results || []
 
   return (
     <div className="min-h-screen">
@@ -144,7 +142,7 @@ export const MovieDetail = ({ movieDetails, credits, videos }: MovieDetailClient
 
                   {movieDetails.release_date && (
                     <div className="flex items-center gap-1 rounded-full bg-white/20 px-2 py-1 text-xs sm:px-3 sm:text-sm">
-                      <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <CalendarIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                       {formatDate(movieDetails.release_date)}
                     </div>
                   )}
@@ -351,5 +349,5 @@ export const MovieDetail = ({ movieDetails, credits, videos }: MovieDetailClient
         </div>
       )}
     </div>
-  );
-};
+  )
+}

@@ -2,24 +2,25 @@
 
 import { Pagination } from '@/features/page/components/pagination';
 import { useMovieList } from '@/features/page/hooks/use-movie-list';
-import { DiscoverMovieFilters, MoviesResponse } from '@/types/movie';
-import { ErrorMessage } from '@/components/error-message';
-import { MovieCard } from '@/components/movie-card';
-import { MovieCardSkeleton } from '@/components/movie-card-skeleton';
+import { DiscoverMovieFilters } from '@/features/page/types'
+import { MoviesResponse } from '@/types/movie'
+import { ErrorMessage } from '@/components/error-message'
+import { MovieCard } from '@/components/movie-card'
+import { MovieCardSkeleton } from '@/components/movie-card-skeleton'
 
 interface MovieListProps {
-  initialMovies: MoviesResponse;
-  filteredMovies?: MoviesResponse | null;
-  isFilterMode?: boolean;
-  searchFilters?: DiscoverMovieFilters | null;
-  title?: '熱門電影' | '搜尋結果';
+  initialMovies: MoviesResponse
+  filteredMovies?: MoviesResponse | null
+  isFilterMode?: boolean
+  appliedFilters?: DiscoverMovieFilters | null
+  title?: '熱門電影' | '搜尋結果'
 }
 
 export const MovieList = ({
   initialMovies,
   filteredMovies,
   isFilterMode = false,
-  searchFilters,
+  appliedFilters,
   title,
 }: MovieListProps) => {
   const {
@@ -39,8 +40,8 @@ export const MovieList = ({
     initialMovies,
     filteredMovies,
     isFilterMode,
-    searchFilters: searchFilters || undefined,
-  });
+    appliedFilters: appliedFilters || undefined,
+  })
 
   if (error && !isFilterMode) {
     return (
@@ -49,7 +50,7 @@ export const MovieList = ({
         message="載入熱門電影時發生錯誤，請稍後再試。"
         onRetry={handleRetry}
       />
-    );
+    )
   }
 
   return (
@@ -61,8 +62,8 @@ export const MovieList = ({
         >
           {title} {isFilterMode ? `(${totalResults})` : ''}
         </h2>
-        {/* 分頁控制 - 只在非搜尋模式或搜尋結果有多頁時顯示 */}
-        {(!isFilterMode || totalPages > 1) && (
+
+        {totalPages > 1 && (
           <Pagination
             currentPage={currentPage}
             canGoBack={canGoBack}
@@ -78,24 +79,13 @@ export const MovieList = ({
       </div>
 
       {/* 電影網格 */}
-      <div className="">
-        {isLoading && !isFilterMode ? (
-          <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-5">
-            {Array.from({ length: 20 }).map((_, index) => (
-              <MovieCardSkeleton key={index} />
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-5">
-            {movies.map(movie => (
-              <MovieCard key={movie.id} movie={movie} />
-            ))}
-          </div>
-        )}
+      <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-5">
+        {isLoading
+          ? Array.from({ length: 20 }).map((_, index) => <MovieCardSkeleton key={index} />)
+          : movies.map(movie => <MovieCard key={movie.id} movie={movie} />)}
       </div>
 
-      {/* 底部分頁控制 - 只在非搜尋模式或搜尋結果有多頁時顯示 */}
-      {(!isFilterMode || totalPages > 1) && (
+      {totalPages > 1 && (
         <div className="flex items-center justify-center">
           <Pagination
             currentPage={currentPage}
@@ -111,5 +101,5 @@ export const MovieList = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}

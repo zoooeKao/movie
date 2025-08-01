@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import { useWatchList } from '@/hooks/use-watch-list';
-import { Calendar, Trash2, X } from 'lucide-react';
+import { formatDate } from '@/utils/format-date';
+import { CalendarIcon, Trash2, X } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
-import { MovieCard } from '@/components/movie-card';
-import { formatDate } from '@/lib/format-date';
+import { MovieCard } from '@/components/movie-card'
+
 
 export const WatchList = () => {
   const { watchList, clearWatchList } = useWatchList();
@@ -18,7 +19,6 @@ export const WatchList = () => {
   };
 
   const sortedWatchList = [...watchList].sort((a, b) => {
-    console.log({ a, b });
     switch (sortBy) {
       case 'added':
         // 越晚加入的排越前面
@@ -77,7 +77,7 @@ export const WatchList = () => {
 
             {/* 加入日期 */}
             <div className="text-muted-foreground mt-2 flex items-center gap-1 text-xs">
-              <Calendar className="h-3 w-3" />
+              <CalendarIcon className="h-3 w-3" />
               {formatDate(item.addedAt)}
             </div>
           </div>

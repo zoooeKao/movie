@@ -1,60 +1,72 @@
-import { useState, useEffect } from 'react'
-import useSWR from 'swr'
-import { MoviesResponse, DiscoverMovieFilters } from '@/types/movie'
-import { scrollToMovieList } from '@/lib/scroll-utils'
-import { movieService, swrKeys } from '@/features/page/services/movie-service'
-import { MovieListState, MovieListActions } from '@/features/page/types'
+import { useEffect, useState } from 'react';
+import { DEFAULT_FILTERS } from '@/features/page/consts';
+import { MovieListActions, MovieListState } from '@/features/page/types';
+import { DiscoverMovieFilters } from '@/features/page/types';
+import { convertFiltersToApiParams } from '@/features/page/utils/filter-params';
+import { scrollToMovieList } from '@/utils/scroll-utils';
+import useSWR from 'swr';
+import { MoviesResponse } from '@/types/movie'
+import { tmdbApi } from '@/lib/api'
+
 
 interface UseMovieListProps {
   initialMovies: MoviesResponse
   filteredMovies?: MoviesResponse | null
   isFilterMode?: boolean
-  searchFilters?: DiscoverMovieFilters
+  appliedFilters?: DiscoverMovieFilters
 }
 
 export const useMovieList = ({
   initialMovies,
   filteredMovies,
   isFilterMode = false,
-  searchFilters,
+  appliedFilters,
 }: UseMovieListProps): MovieListState & MovieListActions => {
   const [currentPage, setCurrentPage] = useState(1)
 
   // 當搜尋條件改變時重置到第一頁
   useEffect(() => {
-    if (isFilterMode && searchFilters) {
+    if (isFilterMode && appliedFilters) {
       setCurrentPage(1)
     }
-  }, [isFilterMode, searchFilters])
+  }, [isFilterMode, appliedFilters])
 
-  // 熱門電影的 SWR
-  const { data: popularData, error: popularError, isLoading: popularIsLoading } = useSWR<MoviesResponse>(
-    !isFilterMode ? swrKeys.popularMovies(currentPage) : null,
-    () => movieService.getPopularMovies(currentPage),
+  const {
+    data: popularData,
+    error: popularError,
+    isLoading: popularIsLoading,
+  } = useSWR<MoviesResponse>(
+    !isFilterMode ? ['popular-movies', currentPage] : null,
+    () => tmdbApi.getPopularMovies(currentPage) as Promise<MoviesResponse>,
     {
       fallbackData: currentPage === 1 && !isFilterMode ? initialMovies : undefined,
-      revalidateOnFocus: true,
-    },
-  )
-
-  // 搜尋結果的 SWR
-  const { data: searchData, error: searchError, isLoading: searchIsLoading } = useSWR<MoviesResponse>(
-    isFilterMode && searchFilters ? swrKeys.searchMovies(searchFilters, currentPage) : null,
-    () => movieService.searchMoviesByFilters(searchFilters!, currentPage),
-    {
-      fallbackData: currentPage === 1 && isFilterMode && filteredMovies ? filteredMovies : undefined,
       revalidateOnFocus: false,
-      dedupingInterval: 5000,
     },
   )
 
-  // 根據模式選擇對應的資料和狀態
-  const data = isFilterMode ? searchData : popularData
-  const error = isFilterMode ? searchError : popularError
-  const isLoading = isFilterMode ? searchIsLoading : popularIsLoading
+  const {
+    data: filterData,
+    error: filterDataError,
+    isLoading: filterDataIsLoading,
+  } = useSWR<MoviesResponse>(
+    isFilterMode && appliedFilters ? ['discover-movies', appliedFilters, currentPage] : null,
+    () => {
+      const params = convertFiltersToApiParams(appliedFilters || DEFAULT_FILTERS)
+      return tmdbApi.discoverMovies({ ...params, page: currentPage })
+    },
+    {
+      fallbackData:
+        currentPage === 1 && isFilterMode && filteredMovies ? filteredMovies : undefined,
+      revalidateOnFocus: false,
+    },
+  )
 
-  // 如果是搜尋模式但沒有 searchFilters，則使用傳入的 filteredMovies（向後相容）
-  const finalData = isFilterMode && !searchFilters ? filteredMovies : data
+  const data = isFilterMode ? filterData : popularData
+  const error = isFilterMode ? filterDataError : popularError
+  const isLoading = isFilterMode ? filterDataIsLoading : popularIsLoading
+
+  // 如果是搜尋模式但沒有 appliedFilters，則使用傳入的 filteredMovies（向後相容）
+  const finalData = isFilterMode && !appliedFilters ? filteredMovies : data
 
   const movies = finalData?.results || []
   const totalPages = finalData?.total_pages || 1
@@ -99,19 +111,19 @@ export const useMovieList = ({
     currentPage,
     isLoading,
     error,
-    
+
     // 分頁狀態
     canGoBack,
     canGoForward,
-    
+
     // 事件處理器
     handlePreviousPage,
     handleNextPage,
     handlePageSelect,
     handleRetry,
     resetToFirstPage,
-    
+
     // 工具函數
     setCurrentPage,
   }
-} 
+}

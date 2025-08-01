@@ -1,22 +1,26 @@
 'use client';
 
-import { useState } from 'react';
-import { ChevronDown, ChevronUp, RotateCcw } from 'lucide-react';
-import { DiscoverMovieFilters, Genre } from '@/types/movie';
+import { useState } from 'react'
+import { DiscoverMovieFilters } from '@/features/page/types'
+import { ChevronDown, ChevronUp, RotateCcw } from 'lucide-react'
+import { Genre } from '@/types/movie'
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { DateFilter, GenreFilter, RatingFilter, RuntimeFilter } from './filter-panel/index';
+import { DateFilter } from './date-filter';
+import { GenreFilter } from './genre-filter';
+import { RatingFilter } from './rating-filter';
+import { RuntimeFilter } from './runtime-filter';
+
 
 interface FilterPanelProps {
-  genres: Genre[];
-  filters: DiscoverMovieFilters;
+  genres: Genre[]
+  filters: DiscoverMovieFilters
   setFilters: (
     filters: DiscoverMovieFilters | ((prev: DiscoverMovieFilters) => DiscoverMovieFilters),
-  ) => void;
-  isLoading: boolean;
-  onGenreToggle: (genreId: number) => void;
-  onReset?: () => void;
-  onSearch: () => void;
+  ) => void
+  isLoading: boolean
+  onReset?: () => void
+  onSearch: () => void
 }
 
 export const FilterPanel = ({
@@ -24,33 +28,31 @@ export const FilterPanel = ({
   filters,
   setFilters,
   isLoading,
-  onGenreToggle,
   onReset,
   onSearch,
 }: FilterPanelProps) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true)
 
   const toggleCollapse = () => {
-    setIsCollapsed(prev => !prev);
-  };
+    setIsCollapsed(prev => !prev)
+  }
 
   return (
-    <Card>
+    <Card className="py-2">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 cursor-pointer" onClick={toggleCollapse}>
             <CardTitle className="text-lg">篩選器</CardTitle>
             <Button
               variant="ghost"
               size="sm"
-              onClick={toggleCollapse}
-              className="h-6 w-6 p-0"
+              className="h-10 w-10 p-0"
               aria-label={isCollapsed ? '展開篩選器' : '收合篩選器'}
             >
               {isCollapsed ? (
-                <ChevronDown className="h-4 w-4" />
+                <ChevronDown className="h-10 w-10 p-0" />
               ) : (
-                <ChevronUp className="h-4 w-4" />
+                <ChevronUp className="h-10 w-10 p-0" />
               )}
             </Button>
           </div>
@@ -62,6 +64,7 @@ export const FilterPanel = ({
           )}
         </div>
       </CardHeader>
+
       {!isCollapsed && (
         <CardContent className="space-y-6">
           {/* 使用者評分 */}
@@ -74,7 +77,7 @@ export const FilterPanel = ({
           <DateFilter filters={filters} setFilters={setFilters} />
 
           {/* 類型 */}
-          <GenreFilter genres={genres} filters={filters} onGenreToggle={onGenreToggle} />
+          <GenreFilter genres={genres} filters={filters} setFilters={setFilters} />
 
           {/* 搜尋按鈕 */}
           <Button onClick={onSearch} className="w-full" disabled={isLoading}>
@@ -83,5 +86,5 @@ export const FilterPanel = ({
         </CardContent>
       )}
     </Card>
-  );
-};
+  )
+}

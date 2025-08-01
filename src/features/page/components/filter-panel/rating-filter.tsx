@@ -1,8 +1,9 @@
 'use client';
 
-import { DiscoverMovieFilters } from '@/types/movie';
-import { VOTE_AVERAGE_TICKS, DEFAULT_FILTERS } from '@/features/page/consts';
+import { DEFAULT_FILTERS, VOTE_AVERAGE_TICKS } from '@/features/page/consts'
+import { DiscoverMovieFilters } from '@/features/page/types';
 import { Slider } from '@/components/ui/slider';
+
 
 interface RatingFilterProps {
   filters: DiscoverMovieFilters;
@@ -54,4 +55,4 @@ export const RatingFilter = ({ filters, setFilters }: RatingFilterProps) => {
       </div>
     </div>
   );
-}; 
+};

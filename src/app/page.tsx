@@ -1,10 +1,11 @@
 import { Suspense } from 'react';
 import { SearchMovies } from '@/features/page';
-import { FilterPanel } from '@/features/page/components/filter-panel';
-import { MoviesResponse } from '@/types/movie';
-import { ErrorMessage } from '@/components/error-message';
-import { LoadingSpinner } from '@/components/loading-spinner';
-import { tmdbApi } from '@/lib/api';
+import { FilterPanel } from '@/features/page/components/filter-panel'
+import { MoviesResponse } from '@/types/movie'
+import { ErrorMessage } from '@/components/error-message'
+import { LoadingSpinner } from '@/components/loading-spinner'
+import { tmdbApi } from '@/lib/api'
+
 
 export default async function Home() {
   // 使用 server component 載入初始熱門電影資料
@@ -55,13 +56,15 @@ export default async function Home() {
                 range: [0, 400],
                 step: 10,
               },
+              releaseDate: {
+                to: new Date(),
+              },
               genres: [],
             }}
             setFilters={() => {}}
             genres={[]}
             isLoading={false}
             onSearch={() => {}}
-            onGenreToggle={() => {}}
           />
 
           {/* 錯誤訊息 */}

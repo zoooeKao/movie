@@ -1,8 +1,9 @@
-import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { MovieDetail } from '@/features/movie-detail';
+import { notFound } from 'next/navigation';
 import { LoadingSpinner } from '@/components/loading-spinner';
 import { tmdbApi } from '@/lib/api';
+
 
 interface MovieDetailPageProps {
   params: Promise<{ id: string }>;
@@ -10,8 +11,7 @@ interface MovieDetailPageProps {
 
 export default async function MovieDetailPage({ params }: MovieDetailPageProps) {
   const { id } = await params;
-  const movieId = parseInt(id);
-  console.log('movieId', movieId);
+  const movieId = parseInt(id)
 
   if (isNaN(movieId)) {
     notFound();
