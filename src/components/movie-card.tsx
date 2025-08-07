@@ -2,35 +2,35 @@
 
 import { useWatchList } from '@/hooks/use-watch-list';
 import { formatRating } from '@/utils/format-rating';
-import { cn } from '@/utils/utils';
-import { Heart, Star } from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link'
-import { Movie } from '@/types/movie'
-import { tmdbApi } from '@/lib/api'
+import { getPosterImage } from '@/utils/image-utils'
+import { cn } from '@/utils/utils'
+import { Heart, Star } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link';
+import { Movie } from '@/types/movie';
 
 
 interface MovieCardProps {
-  movie: Movie;
+  movie: Movie
 }
 
 export const MovieCard = ({ movie }: MovieCardProps) => {
-  const { isInWatchList, addToWatchList, removeFromWatchList } = useWatchList();
+  const { isInWatchList, addToWatchList, removeFromWatchList } = useWatchList()
 
-  const isInList = isInWatchList(movie.id);
+  const isInList = isInWatchList(movie.id)
 
   const handleWatchListClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+    e.preventDefault()
+    e.stopPropagation()
 
     if (isInList) {
-      removeFromWatchList(movie.id);
+      removeFromWatchList(movie.id)
     } else {
       addToWatchList(movie)
     }
-  };
+  }
 
-  const posterUrl = tmdbApi.getPosterImage(movie.poster_path, 'w500');
+  const posterUrl = getPosterImage(movie.poster_path, 'w500')
 
   return (
     <Link href={`/movie-detail/${movie.id}`} className="block">
@@ -85,5 +85,5 @@ export const MovieCard = ({ movie }: MovieCardProps) => {
         </div>
       </div>
     </Link>
-  );
-};
+  )
+}

@@ -276,25 +276,4 @@ export const tmdbApi = {
     })
     return response.data
   },
-
-  // 圖片 URL 輔助函式
-  getImageUrl: (path: string | null, size: 'w200' | 'w300' | 'w500'): string | null => {
-    if (!path) return null
-    return `https://image.tmdb.org/t/p/${size}${path}`
-  },
-
-  getBackdropImage: (path: string | null, size: 'w300' | 'w780' | 'w1280'): string | null => {
-    if (!path) return null
-    return `https://image.tmdb.org/t/p/${size}${path}`
-  },
-
-  getPosterImage: (path: string | null, size: 'w154' | 'w342' | 'w500' | 'w780'): string | null => {
-    if (!path) return null
-    return `https://image.tmdb.org/t/p/${size}${path}`
-  },
-
-  getProfileImage: (path: string | null, size: 'w45' | 'w185' | 'h632'): string | null => {
-    if (!path) return null
-    return `https://image.tmdb.org/t/p/${size}${path}`
-  },
 }

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useWatchList } from '@/hooks/use-watch-list';
 import { formatDate } from '@/utils/format-date';
 import { formatRating } from '@/utils/format-rating';
+import { getBackdropImage, getPosterImage, getProfileImage } from '@/utils/image-utils';
 import { cn } from '@/utils/utils';
 import { CalendarIcon, ChevronDown, Clock, Heart, Play, Star } from 'lucide-react';
 import Image from 'next/image';
@@ -14,15 +15,13 @@ import { LoadingSpinner } from '@/components/loading-spinner'
 import { Button } from '@/components/ui/button'
 import { tmdbApi } from '@/lib/api'
 
-
-const PER_VISIBLE_CAST_COUNT = 16;
+const PER_VISIBLE_CAST_COUNT = 16
 
 interface MovieDetailClientProps {
-  movieDetails: MovieDetails;
-  credits: Credits;
-  videos: VideosResponse;
+  movieDetails: MovieDetails
+  credits: Credits
+  videos: VideosResponse
 }
-
 
 export const MovieDetail = ({ movieDetails, credits, videos }: MovieDetailClientProps) => {
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null)
@@ -46,8 +45,8 @@ export const MovieDetail = ({ movieDetails, credits, videos }: MovieDetailClient
     }
   }
 
-  const backdropUrl = tmdbApi.getBackdropImage(movieDetails.backdrop_path, 'w780')
-  const posterUrl = tmdbApi.getPosterImage(movieDetails.poster_path, 'w500')
+  const backdropUrl = getBackdropImage(movieDetails.backdrop_path, 'w780')
+  const posterUrl = getPosterImage(movieDetails.poster_path, 'w500')
 
   // 找到預告片
   const trailer =
@@ -239,7 +238,7 @@ export const MovieDetail = ({ movieDetails, credits, videos }: MovieDetailClient
                 <div key={actor.id} className="text-center">
                   {actor.profile_path ? (
                     <Image
-                      src={tmdbApi.getProfileImage(actor.profile_path, 'w185') || ''}
+                      src={getProfileImage(actor.profile_path, 'w185') || ''}
                       alt={actor.name}
                       width={120}
                       height={180}
